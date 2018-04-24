@@ -1,0 +1,788 @@
+  [1m[35m (0.4ms)[0m  [1m[34mSELECT sqlite_version(*)[0m
+  [1m[35m (2.2ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" varchar NOT NULL PRIMARY KEY)[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" varchar NOT NULL PRIMARY KEY, "value" varchar, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL)[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Migrating to AddRpush (20180424065937)
+  [1m[35m (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE TABLE "rapns_notifications" ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "badge" integer, "device_token" varchar(64) NOT NULL, "sound" varchar DEFAULT '1.aiff', "alert" varchar, "attributes_for_device" text, "expiry" integer DEFAULT 86400 NOT NULL, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime, "error_code" integer, "error_description" varchar, "deliver_after" datetime, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TABLE "rapns_feedback" ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "device_token" varchar(64) NOT NULL, "failed_at" datetime NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE  INDEX "index_rapns_feedback_on_device_token" ON "rapns_feedback" ("device_token")[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_notifications" ADD "alert_is_json" boolean DEFAULT 'f'[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_notifications" ADD "app" varchar[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_feedback" ADD "app" varchar[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "rapns_apps" ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar NOT NULL, "environment" varchar NOT NULL, "certificate" text NOT NULL, "password" varchar, "connections" integer DEFAULT 1 NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "rapns_notifications" ADD "type" varchar[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "rapns_apps" ADD "type" varchar[0m
+  [1m[35mSQL (0.0ms)[0m  [1m[33mUPDATE "rapns_notifications" SET "type" = 'Rapns::Apns::Notification'[0m
+  [1m[35mSQL (0.0ms)[0m  [1m[33mUPDATE "rapns_apps" SET "type" = 'Rapns::Apns::App'[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) NOT NULL, "sound" varchar DEFAULT '1.aiff', "alert" varchar DEFAULT NULL, "attributes_for_device" text DEFAULT NULL, "expiry" integer DEFAULT 86400 NOT NULL, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" varchar DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar DEFAULT NULL)[0m
+  [1m[35m (0.0ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE  INDEX "tindex_arapns_notifications_multi" ON "arapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_notifications" ("id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "rapns_notifications"[0m
+  [1m[35m (0.5ms)[0m  [1m[35mDROP TABLE "rapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "rapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) NOT NULL, "sound" varchar DEFAULT '1.aiff', "alert" varchar DEFAULT NULL, "attributes_for_device" text DEFAULT NULL, "expiry" integer DEFAULT 86400 NOT NULL, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" varchar DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.0ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rapns_notifications" ("id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "arapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_apps" ("id" integer NOT NULL PRIMARY KEY, "key" varchar NOT NULL, "environment" varchar NOT NULL, "certificate" text NOT NULL, "password" varchar DEFAULT NULL, "connections" integer DEFAULT 1 NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "type" varchar DEFAULT NULL)[0m
+  [1m[35m (0.0ms)[0m  [1m[32mINSERT INTO "arapns_apps" ("id","key","environment","certificate","password","connections","created_at","updated_at","type")
+                     SELECT "id","key","environment","certificate","password","connections","created_at","updated_at","type" FROM "rapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TABLE "rapns_apps" ("id" integer NOT NULL PRIMARY KEY, "key" varchar NOT NULL, "environment" varchar NOT NULL, "certificate" text NOT NULL, "password" varchar DEFAULT NULL, "connections" integer DEFAULT 1 NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.0ms)[0m  [1m[32mINSERT INTO "rapns_apps" ("id","key","environment","certificate","password","connections","created_at","updated_at","type")
+                     SELECT "id","key","environment","certificate","password","connections","created_at","updated_at","type" FROM "arapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) NOT NULL, "sound" varchar DEFAULT '1.aiff', "alert" varchar DEFAULT NULL, "attributes_for_device" text DEFAULT NULL, "expiry" integer DEFAULT 86400 NOT NULL, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" varchar DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.0ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arapns_notifications_multi" ON "arapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_notifications" ("id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "rapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "rapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT '1.aiff', "alert" varchar DEFAULT NULL, "attributes_for_device" text DEFAULT NULL, "expiry" integer DEFAULT 86400 NOT NULL, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" varchar DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.0ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rapns_notifications" ("id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "arapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT '1.aiff', "alert" varchar DEFAULT NULL, "attributes_for_device" text DEFAULT NULL, "expiry" integer DEFAULT 86400 NOT NULL, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" varchar DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.0ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arapns_notifications_multi" ON "arapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_notifications" ("id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "rapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "rapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT '1.aiff', "alert" varchar DEFAULT NULL, "attributes_for_device" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" varchar DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rapns_notifications" ("id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "arapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_apps" ("id" integer NOT NULL PRIMARY KEY, "key" varchar NOT NULL, "environment" varchar NOT NULL, "certificate" text NOT NULL, "password" varchar DEFAULT NULL, "connections" integer DEFAULT 1 NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_apps" ("id","key","environment","certificate","password","connections","created_at","updated_at","type")
+                     SELECT "id","key","environment","certificate","password","connections","created_at","updated_at","type" FROM "rapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TABLE "rapns_apps" ("id" integer NOT NULL PRIMARY KEY, "key" varchar NOT NULL, "environment" varchar DEFAULT NULL, "certificate" text NOT NULL, "password" varchar DEFAULT NULL, "connections" integer DEFAULT 1 NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rapns_apps" ("id","key","environment","certificate","password","connections","created_at","updated_at","type")
+                     SELECT "id","key","environment","certificate","password","connections","created_at","updated_at","type" FROM "arapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_apps" ("id" integer NOT NULL PRIMARY KEY, "key" varchar NOT NULL, "environment" varchar DEFAULT NULL, "certificate" text NOT NULL, "password" varchar DEFAULT NULL, "connections" integer DEFAULT 1 NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_apps" ("id","key","environment","certificate","password","connections","created_at","updated_at","type")
+                     SELECT "id","key","environment","certificate","password","connections","created_at","updated_at","type" FROM "rapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TABLE "rapns_apps" ("id" integer NOT NULL PRIMARY KEY, "key" varchar NOT NULL, "environment" varchar DEFAULT NULL, "certificate" text DEFAULT NULL, "password" varchar DEFAULT NULL, "connections" integer DEFAULT 1 NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.0ms)[0m  [1m[32mINSERT INTO "rapns_apps" ("id","key","environment","certificate","password","connections","created_at","updated_at","type")
+                     SELECT "id","key","environment","certificate","password","connections","created_at","updated_at","type" FROM "arapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_apps"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT '1.aiff', "alert" varchar DEFAULT NULL, "attributes_for_device" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" varchar DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arapns_notifications_multi" ON "arapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_notifications" ("id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "rapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "rapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT '1.aiff', "alert" varchar DEFAULT NULL, "attributes_for_device" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rapns_notifications" ("id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "arapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT '1.aiff', "alert" varchar DEFAULT NULL, "attributes_for_device" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arapns_notifications_multi" ON "arapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_notifications" ("id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "rapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TABLE "rapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT 'default', "alert" varchar DEFAULT NULL, "attributes_for_device" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rapns_notifications" ("id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "arapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT 'default', "alert" varchar DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arapns_notifications_multi" ON "arapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","attributes_for_device","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "rapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "rapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT 'default', "alert" varchar DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rapns_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type" FROM "arapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_apps" ("id" integer NOT NULL PRIMARY KEY, "name" varchar NOT NULL, "environment" varchar DEFAULT NULL, "certificate" text DEFAULT NULL, "password" varchar DEFAULT NULL, "connections" integer DEFAULT 1 NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_apps" ("id","name","environment","certificate","password","connections","created_at","updated_at","type")
+                     SELECT "id","key","environment","certificate","password","connections","created_at","updated_at","type" FROM "rapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TABLE "rapns_apps" ("id" integer NOT NULL PRIMARY KEY, "name" varchar NOT NULL, "environment" varchar DEFAULT NULL, "certificate" text DEFAULT NULL, "password" varchar DEFAULT NULL, "connections" integer DEFAULT 1 NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "type" varchar NOT NULL)[0m
+  [1m[35m (0.0ms)[0m  [1m[32mINSERT INTO "rapns_apps" ("id","name","environment","certificate","password","connections","created_at","updated_at","type")
+                     SELECT "id","name","environment","certificate","password","connections","created_at","updated_at","type" FROM "arapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_apps"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "rapns_apps" ADD "auth_key" varchar[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_notifications" ADD "collapse_key" varchar[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_notifications" ADD "delay_while_idle" boolean DEFAULT 'f' NOT NULL[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "rapns_notifications" ADD "registration_ids" text[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_notifications" ADD "app_id" integer[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_notifications" ADD "retries" integer DEFAULT 0[0m
+  [1m[36mAddRpush::AddGcm::Rapns::App Load (0.1ms)[0m  [1m[34mSELECT "rapns_apps".* FROM "rapns_apps"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT 'default', "alert" varchar DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer DEFAULT NULL, "retries" integer DEFAULT 0)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arapns_notifications_multi" ON "arapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type","collapse_key","delay_while_idle","registration_ids","app_id","retries")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type","collapse_key","delay_while_idle","registration_ids","app_id","retries" FROM "rapns_notifications"[0m
+  [1m[35m (0.3ms)[0m  [1m[35mDROP TABLE "rapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "rapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT 'default', "alert" varchar DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.2ms)[0m  [1m[32mINSERT INTO "rapns_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type","collapse_key","delay_while_idle","registration_ids","app_id","retries")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type","collapse_key","delay_while_idle","registration_ids","app_id","retries" FROM "arapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE "arapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT 'default', "alert" varchar DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "app" varchar DEFAULT NULL, "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arapns_notifications_multi" ON "arapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arapns_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type","collapse_key","delay_while_idle","registration_ids","app_id","retries")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","app","type","collapse_key","delay_while_idle","registration_ids","app_id","retries" FROM "rapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE "rapns_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TABLE "rapns_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT 'default', "alert" varchar DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rapns_notifications" ("delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rapns_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries" FROM "arapns_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arapns_notifications"[0m
+DEPRECATION WARNING: Passing default to #index_name_exists? is deprecated without replacement. (called from block in method_missing at /Users/i351054/.rvm/gems/ruby-2.3.2@global/gems/activerecord-5.1.6/lib/active_record/migration.rb:849)
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP INDEX "index_rapns_notifications_multi"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rapns_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_notifications" ADD "uri" varchar[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_apps" ADD "client_id" varchar[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "rapns_apps" ADD "client_secret" varchar[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "rapns_apps" ADD "access_token" varchar[0m
+  [1m[35m (0.1ms)[0m  [1m[35mALTER TABLE "rapns_apps" ADD "access_token_expiration" datetime[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_notifications" RENAME TO "rpush_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_apps" RENAME TO "rpush_apps"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rapns_feedback" RENAME TO "rpush_feedback"[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_feedback_on_device_token' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_feedback_on_device_token' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_feedback_on_device_token' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_feedback_on_device_token' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_feedback_on_device_token' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_feedback_on_device_token' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rpush_feedback_on_device_token" ON "rpush_feedback" ("device_token")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP INDEX "index_rapns_feedback_on_device_token"[0m
+DEPRECATION WARNING: Passing default to #index_name_exists? is deprecated without replacement. (called from block in method_missing at /Users/i351054/.rvm/gems/ruby-2.3.2@global/gems/activerecord-5.1.6/lib/active_record/migration.rb:849)
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+DEPRECATION WARNING: Passing default to #index_name_exists? is deprecated without replacement. (called from block in method_missing at /Users/i351054/.rvm/gems/ruby-2.3.2@global/gems/activerecord-5.1.6/lib/active_record/migration.rb:849)
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_feedback_on_device_token' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_feedback_on_device_token' AND type='index'
+[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_notifications" SET "type" = 'Rpush::Apns::Notification' WHERE "rpush_notifications"."type" = ?[0m  [["type", "Rapns::Apns::Notification"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_notifications" SET "type" = 'Rpush::Gcm::Notification' WHERE "rpush_notifications"."type" = ?[0m  [["type", "Rapns::Gcm::Notification"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_notifications" SET "type" = 'Rpush::Adm::Notification' WHERE "rpush_notifications"."type" = ?[0m  [["type", "Rapns::Adm::Notification"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_notifications" SET "type" = 'Rpush::Wpns::Notification' WHERE "rpush_notifications"."type" = ?[0m  [["type", "Rapns::Wpns::Notification"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_apps" SET "type" = 'Rpush::Apns::App' WHERE "rpush_apps"."type" = ?[0m  [["type", "Rapns::Apns::App"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_apps" SET "type" = 'Rpush::Gcm::App' WHERE "rpush_apps"."type" = ?[0m  [["type", "Rapns::Gcm::App"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_apps" SET "type" = 'Rpush::Adm::App' WHERE "rpush_apps"."type" = ?[0m  [["type", "Rapns::Adm::App"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_apps" SET "type" = 'Rpush::Wpns::App' WHERE "rpush_apps"."type" = ?[0m  [["type", "Rapns::Wpns::App"]]
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rpush_notifications" ADD "fail_after" datetime[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES (?)[0m  [["version", "20180424065937"]]
+  [1m[35m (6.8ms)[0m  [1m[36mcommit transaction[0m
+Migrating to Rpush200Updates (20180424065938)
+  [1m[35m (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (0.6ms)[0m  [1m[35mALTER TABLE "rpush_notifications" ADD "processing" boolean DEFAULT 'f' NOT NULL[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rpush_notifications" ADD "priority" integer[0m
+DEPRECATION WARNING: Passing default to #index_name_exists? is deprecated without replacement. (called from block in method_missing at /Users/i351054/.rvm/gems/ruby-2.3.2@global/gems/activerecord-5.1.6/lib/active_record/migration.rb:849)
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE  INDEX "index_rpush_notifications_multi" ON "rpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arpush_feedback" ("id" integer NOT NULL PRIMARY KEY, "device_token" varchar(64) NOT NULL, "failed_at" datetime NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "app_id" varchar DEFAULT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_feedback_on_device_token' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_feedback_on_device_token' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arpush_feedback_on_device_token" ON "arpush_feedback" ("device_token")[0m
+  [1m[35m (0.2ms)[0m  [1m[32mINSERT INTO "arpush_feedback" ("id","device_token","failed_at","created_at","updated_at","app_id")
+                     SELECT "id","device_token","failed_at","created_at","updated_at","app" FROM "rpush_feedback"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE "rpush_feedback"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TABLE "rpush_feedback" ("id" integer NOT NULL PRIMARY KEY, "device_token" varchar(64) NOT NULL, "failed_at" datetime NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "app_id" varchar DEFAULT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arpush_feedback_on_device_token' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arpush_feedback_on_device_token' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rpush_feedback_on_device_token" ON "rpush_feedback" ("device_token")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rpush_feedback" ("id","device_token","failed_at","created_at","updated_at","app_id")
+                     SELECT "id","device_token","failed_at","created_at","updated_at","app_id" FROM "arpush_feedback"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arpush_feedback"[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_feedback_on_device_token' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_feedback_on_device_token' AND type='index'
+[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arpush_feedback" ("id" integer NOT NULL PRIMARY KEY, "device_token" varchar(64) NOT NULL, "failed_at" datetime NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "app_id" varchar DEFAULT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_feedback_on_device_token' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_feedback_on_device_token' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arpush_feedback_on_device_token" ON "arpush_feedback" ("device_token")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arpush_feedback" ("id","device_token","failed_at","created_at","updated_at","app_id")
+                     SELECT "id","device_token","failed_at","created_at","updated_at","app_id" FROM "rpush_feedback"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rpush_feedback"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE TABLE "rpush_feedback" ("id" integer NOT NULL PRIMARY KEY, "device_token" varchar(64) NOT NULL, "failed_at" datetime NOT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "app_id" integer DEFAULT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arpush_feedback_on_device_token' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arpush_feedback_on_device_token' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rpush_feedback_on_device_token" ON "rpush_feedback" ("device_token")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rpush_feedback" ("id","device_token","failed_at","created_at","updated_at","app_id")
+                     SELECT "id","device_token","failed_at","created_at","updated_at","app_id" FROM "arpush_feedback"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arpush_feedback"[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_apps" SET "type" = 'Rpush::Client::ActiveRecord::Apns::App' WHERE "rpush_apps"."type" = ?[0m  [["type", "Rpush::Apns::App"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_notifications" SET "type" = 'Rpush::Client::ActiveRecord::Apns::Notification' WHERE "rpush_notifications"."type" = ?[0m  [["type", "Rpush::Apns::Notification"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_apps" SET "type" = 'Rpush::Client::ActiveRecord::Gcm::App' WHERE "rpush_apps"."type" = ?[0m  [["type", "Rpush::Gcm::App"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_notifications" SET "type" = 'Rpush::Client::ActiveRecord::Gcm::Notification' WHERE "rpush_notifications"."type" = ?[0m  [["type", "Rpush::Gcm::Notification"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_apps" SET "type" = 'Rpush::Client::ActiveRecord::Wpns::App' WHERE "rpush_apps"."type" = ?[0m  [["type", "Rpush::Wpns::App"]]
+  [1m[35mSQL (0.2ms)[0m  [1m[33mUPDATE "rpush_notifications" SET "type" = 'Rpush::Client::ActiveRecord::Wpns::Notification' WHERE "rpush_notifications"."type" = ?[0m  [["type", "Rpush::Wpns::Notification"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_apps" SET "type" = 'Rpush::Client::ActiveRecord::Adm::App' WHERE "rpush_apps"."type" = ?[0m  [["type", "Rpush::Adm::App"]]
+  [1m[35mSQL (0.1ms)[0m  [1m[33mUPDATE "rpush_notifications" SET "type" = 'Rpush::Client::ActiveRecord::Adm::Notification' WHERE "rpush_notifications"."type" = ?[0m  [["type", "Rpush::Adm::Notification"]]
+  [1m[35mSQL (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES (?)[0m  [["version", "20180424065938"]]
+  [1m[35m (1.2ms)[0m  [1m[36mcommit transaction[0m
+Migrating to Rpush210Updates (20180424065939)
+  [1m[35m (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "rpush_notifications" ADD "url_args" text[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "rpush_notifications" ADD "category" varchar[0m
+  [1m[35mSQL (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES (?)[0m  [["version", "20180424065939"]]
+  [1m[35m (1.0ms)[0m  [1m[36mcommit transaction[0m
+Migrating to Rpush260Updates (20180424065940)
+  [1m[35m (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "rpush_notifications" ADD "content_available" boolean DEFAULT 'f'[0m
+  [1m[35mSQL (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES (?)[0m  [["version", "20180424065940"]]
+  [1m[35m (1.1ms)[0m  [1m[36mcommit transaction[0m
+Migrating to Rpush270Updates (20180424065941)
+  [1m[35m (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arpush_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT 'default', "alert" varchar DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0, "uri" varchar DEFAULT NULL, "fail_after" datetime DEFAULT NULL, "processing" boolean DEFAULT 'f' NOT NULL, "priority" integer DEFAULT NULL, "url_args" text DEFAULT NULL, "category" varchar DEFAULT NULL, "content_available" boolean DEFAULT 'f')[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arpush_notifications_multi" ON "arpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE  INDEX "tindex_rapns_notifications_multi" ON "arpush_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arpush_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available" FROM "rpush_notifications"[0m
+  [1m[35m (0.5ms)[0m  [1m[35mDROP TABLE "rpush_notifications"[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE TABLE "rpush_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT 'default', "alert" text DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0, "uri" varchar DEFAULT NULL, "fail_after" datetime DEFAULT NULL, "processing" boolean DEFAULT 'f' NOT NULL, "priority" integer DEFAULT NULL, "url_args" text DEFAULT NULL, "category" varchar DEFAULT NULL, "content_available" boolean DEFAULT 'f')[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rpush_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rpush_notifications_multi" ON "rpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rpush_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available" FROM "arpush_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arpush_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mALTER TABLE "rpush_notifications" ADD "notification" text[0m
+  [1m[35mSQL (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES (?)[0m  [["version", "20180424065941"]]
+  [1m[35m (1.1ms)[0m  [1m[36mcommit transaction[0m
+Migrating to Rpush300Updates (20180424065942)
+  [1m[35m (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "rpush_notifications" ADD "mutable_content" boolean DEFAULT 'f'[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arpush_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT 'default', "alert" text DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0, "uri" varchar DEFAULT NULL, "fail_after" datetime DEFAULT NULL, "processing" boolean DEFAULT 'f' NOT NULL, "priority" integer DEFAULT NULL, "url_args" text DEFAULT NULL, "category" varchar DEFAULT NULL, "content_available" boolean DEFAULT 'f', "notification" text DEFAULT NULL, "mutable_content" boolean DEFAULT 'f')[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arpush_notifications_multi" ON "arpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE  INDEX "tindex_rapns_notifications_multi" ON "arpush_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arpush_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content" FROM "rpush_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE "rpush_notifications"[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE TABLE "rpush_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT NULL, "alert" text DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0, "uri" varchar DEFAULT NULL, "fail_after" datetime DEFAULT NULL, "processing" boolean DEFAULT 'f' NOT NULL, "priority" integer DEFAULT NULL, "url_args" text DEFAULT NULL, "category" varchar DEFAULT NULL, "content_available" boolean DEFAULT 'f', "notification" text DEFAULT NULL, "mutable_content" boolean DEFAULT 'f')[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rpush_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE  INDEX "index_rpush_notifications_multi" ON "rpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.3ms)[0m  [1m[32mINSERT INTO "rpush_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content" FROM "arpush_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE "arpush_notifications"[0m
+  [1m[35mSQL (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES (?)[0m  [["version", "20180424065942"]]
+  [1m[35m (1.1ms)[0m  [1m[36mcommit transaction[0m
+Migrating to Rpush301Updates (20180424065943)
+  [1m[35m (0.0ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arpush_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT NULL, "alert" text DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0, "uri" varchar DEFAULT NULL, "fail_after" datetime DEFAULT NULL, "processing" boolean DEFAULT 'f' NOT NULL, "priority" integer DEFAULT NULL, "url_args" text DEFAULT NULL, "category" varchar DEFAULT NULL, "content_available" boolean DEFAULT 'f', "notification" text DEFAULT NULL, "mutable_content" boolean DEFAULT 'f')[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE  INDEX "tindex_arpush_notifications_multi" ON "arpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_rapns_notifications_multi" ON "arpush_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arpush_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content" FROM "rpush_notifications"[0m
+  [1m[35m (0.4ms)[0m  [1m[35mDROP TABLE "rpush_notifications"[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE TABLE "rpush_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT NULL, "alert" text DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0, "uri" varchar DEFAULT NULL, "fail_after" datetime DEFAULT NULL, "processing" boolean DEFAULT 'f' NOT NULL, "priority" integer DEFAULT NULL, "url_args" text DEFAULT NULL, "category" varchar DEFAULT NULL, "content_available" boolean DEFAULT 'f', "notification" text DEFAULT NULL, "mutable_content" boolean DEFAULT 'f' NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rpush_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rpush_notifications_multi" ON "rpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rpush_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content" FROM "arpush_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arpush_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arpush_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT NULL, "alert" text DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0, "uri" varchar DEFAULT NULL, "fail_after" datetime DEFAULT NULL, "processing" boolean DEFAULT 'f' NOT NULL, "priority" integer DEFAULT NULL, "url_args" text DEFAULT NULL, "category" varchar DEFAULT NULL, "content_available" boolean DEFAULT 'f', "notification" text DEFAULT NULL, "mutable_content" boolean DEFAULT 'f' NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arpush_notifications_multi" ON "arpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_rapns_notifications_multi" ON "arpush_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arpush_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content" FROM "rpush_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rpush_notifications"[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE TABLE "rpush_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT NULL, "alert" text DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0, "uri" varchar DEFAULT NULL, "fail_after" datetime DEFAULT NULL, "processing" boolean DEFAULT 'f' NOT NULL, "priority" integer DEFAULT NULL, "url_args" text DEFAULT NULL, "category" varchar DEFAULT NULL, "content_available" boolean DEFAULT 'f' NOT NULL, "notification" text DEFAULT NULL, "mutable_content" boolean DEFAULT 'f' NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rpush_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rpush_notifications_multi" ON "rpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "rpush_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content" FROM "arpush_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "arpush_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE TEMPORARY TABLE "arpush_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT NULL, "alert" text DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f', "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0, "uri" varchar DEFAULT NULL, "fail_after" datetime DEFAULT NULL, "processing" boolean DEFAULT 'f' NOT NULL, "priority" integer DEFAULT NULL, "url_args" text DEFAULT NULL, "category" varchar DEFAULT NULL, "content_available" boolean DEFAULT 'f' NOT NULL, "notification" text DEFAULT NULL, "mutable_content" boolean DEFAULT 'f' NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_arpush_notifications_multi" ON "arpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "tindex_rapns_notifications_multi" ON "arpush_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "arpush_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content" FROM "rpush_notifications"[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE "rpush_notifications"[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE TABLE "rpush_notifications" ("id" integer NOT NULL PRIMARY KEY, "badge" integer DEFAULT NULL, "device_token" varchar(64) DEFAULT NULL, "sound" varchar DEFAULT NULL, "alert" text DEFAULT NULL, "data" text DEFAULT NULL, "expiry" integer DEFAULT 86400, "delivered" boolean DEFAULT 'f' NOT NULL, "delivered_at" datetime DEFAULT NULL, "failed" boolean DEFAULT 'f' NOT NULL, "failed_at" datetime DEFAULT NULL, "error_code" integer DEFAULT NULL, "error_description" text DEFAULT NULL, "deliver_after" datetime DEFAULT NULL, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, "alert_is_json" boolean DEFAULT 'f' NOT NULL, "type" varchar NOT NULL, "collapse_key" varchar DEFAULT NULL, "delay_while_idle" boolean DEFAULT 'f' NOT NULL, "registration_ids" text DEFAULT NULL, "app_id" integer NOT NULL, "retries" integer DEFAULT 0, "uri" varchar DEFAULT NULL, "fail_after" datetime DEFAULT NULL, "processing" boolean DEFAULT 'f' NOT NULL, "priority" integer DEFAULT NULL, "url_args" text DEFAULT NULL, "category" varchar DEFAULT NULL, "content_available" boolean DEFAULT 'f' NOT NULL, "notification" text DEFAULT NULL, "mutable_content" boolean DEFAULT 'f' NOT NULL)[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='tindex_arpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='tindex_arpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rapns_notifications_multi" ON "rpush_notifications" ("app_id", "delivered", "failed", "deliver_after")[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE  INDEX "index_rpush_notifications_multi" ON "rpush_notifications" ("delivered", "failed") WHERE NOT delivered AND NOT failed[0m
+  [1m[35m (0.3ms)[0m  [1m[32mINSERT INTO "rpush_notifications" ("id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content")
+                     SELECT "id","badge","device_token","sound","alert","data","expiry","delivered","delivered_at","failed","failed_at","error_code","error_description","deliver_after","created_at","updated_at","alert_is_json","type","collapse_key","delay_while_idle","registration_ids","app_id","retries","uri","fail_after","processing","priority","url_args","category","content_available","notification","mutable_content" FROM "arpush_notifications"[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE "arpush_notifications"[0m
+  [1m[35mSQL (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES (?)[0m  [["version", "20180424065943"]]
+  [1m[35m (2.7ms)[0m  [1m[36mcommit transaction[0m
+Migrating to Rpush310AddPushy (20180424065944)
+  [1m[35m (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "rpush_notifications" ADD "external_device_id" varchar[0m
+  [1m[35mSQL (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES (?)[0m  [["version", "20180424065944"]]
+  [1m[35m (1.0ms)[0m  [1m[36mcommit transaction[0m
+Migrating to Rpush311Updates (20180424065945)
+  [1m[35m (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (0.5ms)[0m  [1m[35mDROP INDEX "index_rpush_notifications_multi"[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_rpush_notifications_multi" ON "rpush_notifications" ("delivered", "failed", "processing", "deliver_after", "created_at") WHERE NOT delivered AND NOT failed[0m
+  [1m[35mSQL (0.4ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES (?)[0m  [["version", "20180424065945"]]
+  [1m[35m (1.1ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT  "ar_internal_metadata".* FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = ? LIMIT ?[0m  [["key", "environment"], ["LIMIT", 1]]
+  [1m[35m (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35mSQL (0.6ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES (?, ?, ?, ?)[0m  [["key", "environment"], ["value", "development"], ["created_at", "2018-04-24 07:04:11.081333"], ["updated_at", "2018-04-24 07:04:11.081333"]]
+  [1m[35m (1.2ms)[0m  [1m[36mcommit transaction[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_feedback_on_device_token' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_feedback_on_device_token' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rpush_notifications_multi' AND type='index'
+[0m
+  [1m[35m (0.1ms)[0m  [1m[34m            SELECT sql
+            FROM sqlite_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+            UNION ALL
+            SELECT sql
+            FROM sqlite_temp_master
+            WHERE name='index_rapns_notifications_multi' AND type='index'
+[0m
